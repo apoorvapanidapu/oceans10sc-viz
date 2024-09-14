@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oceanography Metadata Visualization</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Oceanography Metadata Visualization</h1>
+        <p>Explore CTD data, ROV videos, and plankton images at specific GPS coordinates.</p>
+    </header>
+
+    <main>
+        <!-- CTD Data Section -->
+        <section id="ctd-data">
+            <h2>CTD Data</h2>
+            <p>Visualize temperature, salinity, and depth from our research expeditions.</p>
+            <div id="ctd-graph"> <!-- Graph will be injected here by JS --> </div>
+        </section>
+
+        <!-- ROV Video Section -->
+        <section id="rov-videos">
+            <h2>ROV Videos</h2>
+            <p>Watch ROV footage with GPS coordinates and dive depths.</p>
+            <video width="600" controls>
+                <source src="videos/rov_video.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </section>
+
+        <!-- Plankton Image Gallery -->
+        <section id="plankton-gallery">
+            <h2>Plankton Gallery</h2>
+            <p>View images of plankton samples collected at various depths and coordinates.</p>
+            <img src="images/plankton1.jpg" alt="Plankton sample at [GPS coordinates]">
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Oceanography Research Team</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
