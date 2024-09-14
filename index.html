@@ -30,16 +30,30 @@
             </video>
         </section>
 
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <div id="map" style="height: 500px;"></div>
+
+        <!-- Input form for GPS coordinates -->
+        <form id="gps-form">
+            <label for="lat">Latitude:</label>
+            <input type="text" id="lat" placeholder="Latitude">
+            <label for="lng">Longitude:</label>
+            <input type="text" id="lng" placeholder="Longitude">
+            <button type="button" onclick="addMarker()">Add Marker</button>
+        </form>
+
         <!-- Plankton Image Gallery -->
         <section id="plankton-gallery">
             <h2>Plankton Gallery</h2>
             <p>View images of plankton samples collected at various depths and coordinates.</p>
             <img src="images/plankton1.jpg" alt="Plankton sample at [GPS coordinates]">
         </section>
+
     </main>
 
     <footer>
-        <p>&copy; 2024 Oceanography Research Team</p>
+        <p>&copy; 2024 Oceans 10SC</p>
     </footer>
 
     <script src="script.js"></script>
