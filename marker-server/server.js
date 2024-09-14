@@ -8,8 +8,12 @@ const port = 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/markers', { useNewUrlParser: true, useUnifiedTopology: true });
+// Replace with your MongoDB Atlas connection string
+const dbURI = 'mongodb+srv://apoorvapanidapu:Oceans1234!@oceans10sc-cluster.urfzm.mongodb.net/?retryWrites=true&w=majority&appName=oceans10sc-cluster';
+
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB Atlas'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 // Define Marker Schema and Model
 const markerSchema = new mongoose.Schema({
