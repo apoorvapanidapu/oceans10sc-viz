@@ -50,19 +50,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to load markers
+    // Load existing markers when the page loads
+    loadMarkers();
+
     async function loadMarkers() {
         try {
+            console.log('Loading markers...');
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
+    
             const markerData = await response.json();
-            markerData.forEach(data => {
-                const marker = L.marker([data.lat, data.lng]).addTo(map);
-                marker.bindPopup(createPopupContent(data));
-                markers.push({ marker, id: data._id });
+            console.log('Marker data received:', markerData);
+            
+            markerData.forEach((data, index) => {
+                console.log(`Processing marker ${index}:`, data);
+                if (data && typeof data.lat === 'number' && typeof data.lng === 'number') {
+                    const marker = L.marker([data.lat, data.lng]).addTo(map);
+                    marker.bindPopup(createPopupContent(data));
+                    markers.push({ marker, id: data._id });
+                    console.log(`Marker ${index} added successfully`);
+                } else {
+                    console.error(`Invalid marker data for index ${index}:`, data);
+                }
             });
-
+            
+            console.log('Markers loading complete');
         } catch (error) {
             console.error('Error loading markers:', error);
         }
@@ -106,6 +118,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener for form submission
     document.getElementById('add-marker-form').addEventListener('submit', addMarker);
 
-    // Load existing markers when the page loads
-    loadMarkers();
 });

@@ -25,18 +25,22 @@ const Marker = mongoose.model('Marker', markerSchema);
 // API Endpoints
 app.post('/api/markers', async (req, res) => {
   try {
+    console.log('Received marker data:', req.body);
     const marker = new Marker(req.body);
-    await marker.save();
-    res.status(201).json(marker);
+    const savedMarker = await marker.save();
+    console.log('Marker saved successfully:', savedMarker);
+    res.status(201).json(savedMarker);
   } catch (error) {
-    console.error('Error adding marker:', error);
-    res.status(500).json({ error: 'Server error while adding marker.' });
+    console.error('Detailed error adding marker:', error);
+    res.status(500).json({ error: 'Server error while adding marker.', details: error.message });
   }
 });
 
 app.get('/api/markers', async (req, res) => {
   try {
+    console.log('Fetching markers from database...');
     const markers = await Marker.find();
+    console.log('Markers fetched:', markers.map(m => ({ id: m._id, lat: m.lat, lng: m.lng })));
     res.json(markers);
   } catch (error) {
     console.error('Error fetching markers:', error);
@@ -46,10 +50,7 @@ app.get('/api/markers', async (req, res) => {
 
 app.delete('/api/markers/:id', async (req, res) => {
   try {
-    const result = await Marker.findByIdAndDelete(req.params.id);
-    if (!result) {
-      return res.status(404).json({ error: 'Marker not found' });
-    }
+    await Marker.findByIdAndDelete(req.params.id);
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting marker:', error);
