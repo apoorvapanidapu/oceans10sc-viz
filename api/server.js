@@ -1,15 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');  // Import CORS middleware
 const mongoose = require('mongoose');
 
 const app = express();
-const port = 3000;
 
+app.use(cors());  // Enable CORS for all routes
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Replace with your MongoDB Atlas connection string
-const dbURI = 'mongodb+srv://apoorvapanidapu:Oceans1234!@oceans10sc-cluster.urfzm.mongodb.net/oceans10sc/?retryWrites=true&w=majority';
+const dbURI = 'mongodb+srv://apoorvapanidapu:Oceans1234!@oceans10sc-cluster.urfzm.mongodb.net/oceans10sc?retryWrites=true&w=majority';
 
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB Atlas'))
@@ -24,21 +25,40 @@ const Marker = mongoose.model('Marker', markerSchema);
 
 // API Endpoints
 app.post('/markers', async (req, res) => {
-  const marker = new Marker(req.body);
-  await marker.save();
-  res.status(201).send(marker);
+  try {
+    const marker = new Marker(req.body);
+    await marker.save();
+    res.status(201).send(marker);
+  } catch (error) {
+    console.error('Error adding marker:', error);
+    res.status(500).send('Server error while adding marker.');
+  }
 });
 
 app.get('/markers', async (req, res) => {
-  const markers = await Marker.find();
-  res.send(markers);
+  try {
+    const markers = await Marker.find();
+    res.send(markers);
+  } catch (error) {
+    console.error('Error fetching markers:', error);
+    res.status(500).send('Server error while fetching markers.');
+  }
 });
 
 app.delete('/markers/:id', async (req, res) => {
-  await Marker.findByIdAndDelete(req.params.id);
-  res.status(204).send();
+  try {
+    await Marker.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting marker:', error);
+    res.status(500).send('Server error while deleting marker.');
+  }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+// Remove this part for Vercel (no need to listen to a port)
+// app.listen(port, () => {
+//   console.log(`Server running on http://localhost:${port}`);
+// });
+
+// Export the Express app for Vercel
+module.exports = app;

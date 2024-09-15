@@ -13,22 +13,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Initialize the map and set its view to Monterey Bay with a specific zoom level
-var map = L.map('map').setView([36.6002, -121.8947], 10);
+var map = L.map('map').setView([36.6002, -121.8947], 9);
 
 // Add a tile layer (this example uses OpenStreetMap)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-const apiUrl = 'http://localhost:3000/markers'; // Use the correct API URL
+const apiUrl = 'https://oceans10sc-workspace.vercel.app/api/markers'; // Use the correct API URL
 
 // Array to hold marker references
-let markers = [];
+var markers = [];
 
-// Function to add a marker
 async function addMarker() {
     const lat = parseFloat(document.getElementById("lat").value);
     const lng = parseFloat(document.getElementById("lng").value);
+
+    console.log(`Adding marker at latitude: ${lat}, longitude: ${lng}`); // Debug log
 
     if (lat && lng) {
         try {
@@ -40,9 +41,13 @@ async function addMarker() {
                 body: JSON.stringify({ lat, lng })
             });
 
+            console.log(`API response status: ${response.status}`); // Debug log
+
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
             const markerData = await response.json();
+            console.log('Marker data:', markerData); // Debug log
+
             const marker = L.marker([lat, lng]).addTo(map);
 
             marker.bindPopup(`
@@ -64,7 +69,6 @@ async function addMarker() {
     }
 }
 
-// Function to load markers from the server
 async function loadMarkers() {
     try {
         const response = await fetch(apiUrl);
@@ -90,7 +94,6 @@ async function loadMarkers() {
     }
 }
 
-// Function to delete a marker
 async function deleteMarker(id) {
     try {
         await fetch(`${apiUrl}/${id}`, {
