@@ -1,22 +1,15 @@
 {
-  "name": "oceans10sc-workspace",
+  "name": "oceans10sc-viz",
   "version": "1.0.0",
-  "description": "",
-  "main": "script.js",
+  "description": "Oceanography research data visualization",
+  "main": "api/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node api/server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "oceans10sc-viz"
-  },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
-    "express": "^4.21.0",
-    "mongoose": "^8.6.2"
+    "express": "^4.17.1",
+    "mongoose": "^5.12.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5"
   }
 }
