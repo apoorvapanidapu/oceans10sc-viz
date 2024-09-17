@@ -29,12 +29,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function initializeMap() {
         // Initialize the map and set its view to Monterey Bay
-        var map = L.map('map').setView([36.6002, -121.8947], 9);
+        window.map = L.map('map').setView([36.6002, -121.8947], 9);
 
         // Add a tile layer (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        }).addTo(window.map);
 
         const apiUrl = '/api/markers';
 
@@ -43,6 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Load existing markers
         loadMarkers();
+
+        // Check if there's a lastSubmittedMarker and add it
+        if (window.lastSubmittedMarker) {
+            addSubmittedMarker(window.lastSubmittedMarker);
+        }
 
         async function loadMarkers() {
             try {
@@ -55,10 +60,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 markerData.forEach((data) => {
                     if (data && typeof data.lat === 'number' && typeof data.lng === 'number') {
-                        const marker = L.marker([data.lat, data.lng]).addTo(map);
+                        let isNewMarker = window.lastSubmittedMarker && 
+                                          data._id === window.lastSubmittedMarker._id;
+                        
+                        const marker = L.marker([data.lat, data.lng], {
+                            icon: L.icon({
+                                iconUrl: isNewMarker ? 
+                                    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png' : 
+                                    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(window.map);
+    
                         marker.bindPopup(createPopupContent(data));
                         marker.on('click', () => showMarkerDetails(data));
                         markers.push({ marker, id: data._id });
+    
+                        if (isNewMarker) {
+                            window.map.setView([data.lat, data.lng], 10);
+                            showMarkerDetails(data);
+                            window.lastSubmittedMarker = null;
+                        }
                     } else {
                         console.error('Invalid marker data:', data);
                     }
@@ -69,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error loading markers:', error);
             }
         }
+
 
         // Function to create popup content
         function createPopupContent(data) {
@@ -147,6 +174,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         };
+
+        // Function to add the submitted marker
+        function addSubmittedMarker(data) {
+            const marker = L.marker([data.lat, data.lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(window.map);
+
+        marker.bindPopup(createPopupContent(data));
+        marker.on('click', () => showMarkerDetails(data));
+
+        markers.push({ marker, id: data._id });
+        window.map.setView([data.lat, data.lng], 10);
+
+        // Show marker details
+        showMarkerDetails(data);
+
+        // Clear the lastSubmittedMarker
+        window.lastSubmittedMarker = null;
+        }
 
         // Event listener for form submission
         document.getElementById('add-marker-form').addEventListener('submit', addMarker);

@@ -25,6 +25,9 @@ const questions = [
 let currentQuestion = 0;
 let answers = {};
 
+// Add this line at the top of your file
+window.lastSubmittedMarker = null;
+
 document.getElementById('next-button').addEventListener('click', nextQuestion);
 document.getElementById('submit-button').addEventListener('click', submitQuestionnaire);
 document.getElementById('back-button').addEventListener('click', previousQuestion);
@@ -174,6 +177,10 @@ function submitQuestionnaire() {
         .then(data => {
             console.log('Success:', data);
             localStorage.setItem('questionnaireCompleted', 'true');
+            
+            // Store the submitted marker data
+            window.lastSubmittedMarker = data;
+            
             showMainContent();
         })
         .catch((error) => {
@@ -182,6 +189,56 @@ function submitQuestionnaire() {
         });
     }
 }
+
+// Helper functions (make sure these are defined or imported)
+function createPopupContent(data) {
+    return `
+        <b>Location:</b> ${data.lat}, ${data.lng}<br>
+        <b>Start Time:</b> ${data.startTime || 'N/A'}<br>
+        <b>Activity:</b> ${data.activity || 'N/A'}<br>
+        <b>Depth:</b> ${data.depth ? data.depth + ' m' : 'N/A'}
+    `;
+}
+
+function showMarkerDetails(data) {
+    const detailsDiv = document.getElementById('marker-details');
+    const contentDiv = document.getElementById('marker-details-content');
+    contentDiv.innerHTML = `
+        <h3>Marker Details</h3>
+        <p><b>Location:</b> ${data.lat}, ${data.lng}</p>
+        <p><b>Start Time:</b> ${data.startTime || 'N/A'}</p>
+        <p><b>End Time:</b> ${data.endTime || 'N/A'}</p>
+        <p><b>Depth:</b> ${data.depth ? data.depth + ' m' : 'N/A'}</p>
+        <p><b>Activity:</b> ${data.activity || 'N/A'}</p>
+        ${data.otherActivity ? `<p><b>Other Activity:</b> ${data.otherActivity}</p>` : ''}
+        <p><b>Notes:</b> ${data.notes || 'N/A'}</p>
+    `;
+    
+    // Display uploaded media
+    if (data.media && data.media.length > 0) {
+        contentDiv.innerHTML += '<h4>Uploaded Media:</h4>';
+        data.media.forEach(mediaPath => {
+            if (mediaPath.match(/\.(jpeg|jpg|gif|png)$/)) {
+                contentDiv.innerHTML += `<img src="${mediaPath}" alt="Uploaded image" style="max-width: 100%; height: auto;">`;
+            } else if (mediaPath.match(/\.(mp4|webm|ogg)$/)) {
+                contentDiv.innerHTML += `
+                    <video controls style="max-width: 100%; height: auto;">
+                        <source src="${mediaPath}" type="video/${mediaPath.split('.').pop()}">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+            }
+        });
+    }
+
+    // Add delete button
+    contentDiv.innerHTML += `
+        <button onclick="deleteMarker('${data._id}')">Delete Marker</button>
+    `;
+
+    detailsDiv.style.display = 'block';
+}
+
 
 // Make sure to expose necessary functions to the global scope
 window.submitQuestionnaire = submitQuestionnaire;
