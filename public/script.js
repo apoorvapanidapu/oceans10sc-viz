@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Website loaded");
 
     // Check if the user has already gone through the questionnaire
-    if (!sessionStorage.getItem('questionnaireCompleted')) {
+    if (!localStorage.getItem('questionnaireCompleted')) {
         document.getElementById('initial-screen').style.display = 'flex';
         document.getElementById('main-content').style.display = 'none';
     } else {
@@ -23,9 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('questionnaire').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
         initializeMap();
-        
-        // Set the questionnaire as completed to prevent it from showing again
-        sessionStorage.setItem('questionnaireCompleted', 'true');
     }
 
     function initializeMap() {
@@ -121,33 +118,27 @@ document.addEventListener('DOMContentLoaded', function() {
         // Function to add a marker
         async function addMarker(e) {
             e.preventDefault();
-            const lat = parseFloat(document.getElementById("lat").value);
-            const lng = parseFloat(document.getElementById("lng").value);
-
-            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-                alert("Please enter valid GPS coordinates.");
-                return;
-            }
+            const formData = new FormData(e.target);
 
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ lat, lng })
+                    body: formData
                 });
 
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                 const markerData = await response.json();
-                const marker = L.marker([lat, lng]).addTo(map);
+                const marker = L.marker([markerData.lat, markerData.lng]).addTo(map);
 
                 marker.bindPopup(createPopupContent(markerData));
                 marker.on('click', () => showMarkerDetails(markerData));
 
                 markers.push({ marker, id: markerData._id });
-                map.setView([lat, lng], 10);
+                map.setView([markerData.lat, markerData.lng], 10);
+
+                // Clear the form after successful submission
+                e.target.reset();
 
             } catch (error) {
                 console.error('Error adding marker:', error);

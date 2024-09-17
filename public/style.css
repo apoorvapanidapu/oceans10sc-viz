@@ -7,25 +7,79 @@ body {
     background-color: #f4f4f4;
 }
 
-/* Style for the header */
-header {
-    background-color: #005f73;
-    color: white;
-    text-align: center;
-    padding: 1rem 0;
+/* Initial Screen and Questionnaire styling */
+#initial-screen {
+    background-color: #000;
+    color: rgb(228, 238, 228);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-header h1 {
-    margin: 0;
+#initial-screen h1 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+}
+
+#initial-screen button {
+    background-color: rgb(228, 238, 228);
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    margin: 10px;
+}
+
+#questionnaire {
+    background-color: #000;
+    color: rgb(228, 238, 228);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#questionnaire #question-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#questionnaire input, #questionnaire select, #questionnaire textarea {
+    display: block;
+    margin: 10px auto;
+    padding: 5px;
+    width: 200px;
+}
+
+#questionnaire button {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: rgb(228, 238, 228);
+    color: #000;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+#back-button, #next-button, #submit-button {
+    display: none; /* Initially hide all buttons */
 }
 
 /* Main content styling */
-main {
+#main-content {
     margin: 20px auto;
     width: 90%;
     max-width: 1000px;
 }
 
+/* Section styling */
 section {
     margin-bottom: 40px;
     background: white;
@@ -38,6 +92,62 @@ h2 {
     color: #0a9396;
 }
 
+/* Video and Map styling */
+video, #map {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+/* Add Marker Form */
+#add-marker-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#add-marker-form label {
+    margin-top: 10px;
+}
+
+#add-marker-form input {
+    padding: 8px;
+    font-size: 1em;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#add-marker-form button {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#add-marker-form button:hover {
+    background-color: #0056b3;
+}
+
+/* Plankton Image Gallery */
+#plankton-gallery img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+/* Style for the header */
+header {
+    background-color: #005f73;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+/* Footer */
 footer {
     background-color: #005f73;
     color: white;
@@ -46,4 +156,9 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+}
+
+/* Hide initial screen and questionnaire initially */
+#main-content, #questionnaire {
+    display: none;
 }

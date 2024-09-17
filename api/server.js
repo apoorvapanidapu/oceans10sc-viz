@@ -51,7 +51,7 @@ app.post('/api/markers', upload.array('media', 5), async (req, res) => {
       ...req.body,
       lat: parseFloat(req.body.lat),
       lng: parseFloat(req.body.lng),
-      depth: req.body.depth ? parseFloat(req.body.depth) : undefined,
+      depth: req.body.depth && req.body.depth !== '' ? parseFloat(req.body.depth) : undefined,
       media: req.files ? req.files.map(file => file.path) : []
     };
 
