@@ -143,6 +143,7 @@ function saveAnswer(index) {
     }
 }
 
+// Modify the submitQuestionnaire function
 function submitQuestionnaire() {
     if (validateQuestion(currentQuestion)) {
         saveAnswer(currentQuestion);
@@ -173,7 +174,7 @@ function submitQuestionnaire() {
         .then(data => {
             console.log('Success:', data);
             localStorage.setItem('questionnaireCompleted', 'true');
-            window.location.href = 'index.html';
+            showMainContent();
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -181,6 +182,9 @@ function submitQuestionnaire() {
         });
     }
 }
+
+// Make sure to expose necessary functions to the global scope
+window.submitQuestionnaire = submitQuestionnaire;
 
 // Start with the first question
 showQuestion(0);

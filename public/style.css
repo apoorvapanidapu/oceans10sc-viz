@@ -133,6 +133,28 @@ video, #map {
     background-color: #0056b3;
 }
 
+#marker-details {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+#marker-details button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#marker-details button:hover {
+    background-color: #c82333;
+}
+
 /* Plankton Image Gallery */
 #plankton-gallery img {
     max-width: 100%;

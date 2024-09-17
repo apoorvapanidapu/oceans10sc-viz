@@ -14,8 +14,8 @@
     <!-- Initial Screen (Questionnaire) -->
     <div id="initial-screen">
         <h1>Let's enter your metadata</h1>
-        <button id="yes-button">Yes</button>
-        <button id="no-button">No</button>
+        <button id="yes-button" onclick="startQuestionnaire()">Yes</button>
+        <button id="no-button" onclick="showMainContent()">No</button>
     </div>
 
     <!-- Questionnaire Section -->
@@ -53,6 +53,10 @@
             <section id="map-container">
                 <h2>Interactive Map</h2>
                 <div id="map" style="height: 400px;"></div>
+            </section>
+
+            <section id="marker-details" style="display: none;">
+                <div id="marker-details-content"></div>
             </section>
 
             <section id="marker-form">
