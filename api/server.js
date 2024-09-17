@@ -20,8 +20,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Replace with your MongoDB connection string
-const dbURI = 'mongodb+srv://apoorvapanidapu:Oceans1234!@oceans10sc-cluster.urfzm.mongodb.net/oceans10sc?retryWrites=true&w=majority';
+require('dotenv').config();
+
+// Replace hardcoded MongoDB URI with the one from the .env file
+const dbURI = process.env.MONGODB_URI;
 
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB Atlas'))
