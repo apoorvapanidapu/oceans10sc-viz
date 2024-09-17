@@ -3,38 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oceanography Metadata Visualization</title>
+    <title>Oceans 10SC x Western Flyer Metadata Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Serif', monospace;
+            margin: 0;
+            padding: 0;
+        }
+        #initial-screen {
+            background-color: #000;
+            color: rgb(228, 238, 228);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #initial-screen h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        #initial-screen button {
+            background-color: rgb(228, 238, 228)#0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        #questionnaire, #main-content {
+            display: none;
+        }
+        #questionnaire {
+            background-color: #000;
+            color: rgb(228, 238, 228);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #questionnaire input, #questionnaire select, #questionnaire textarea {
+            display: block;
+            margin: 10px auto;
+            padding: 5px;
+            width: 200px;
+        }
+        #map {
+            height: 400px;
+        }
+        .section {
+            margin: 20px;
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <div id="initial-screen">
+        <h1>Let's enter your metadata</h1>
+        <button id="yes-button">Yes</button>
+        <button id="no-button">No</button>
+    </div>
+
+    <div id="questionnaire">
+        <h2 id="question-title"></h2>
+        <div id="question-content"></div>
+        <button id="next-button" style="display: none;">Next</button>
+        <button id="submit-button" style="display: none;">Submit</button>
+    </div>
+
+    <div id="main-content">
         <h1>Oceans 10SC x Western Flyer Metadata Visualization</h1>
         <p>Explore CTD data, ROV videos, and plankton images at specific GPS coordinates.</p>
-    </header>
 
-    <main>
-        <!-- CTD Data Section -->
-        <section id="ctd-data">
+        <div id="ctd-data" class="section">
             <h2>CTD Data</h2>
             <p>Visualize temperature, salinity, and depth from our research expeditions.</p>
-            <div id="ctd-graph"> <!-- Graph will be injected here by JS --> </div>
-        </section>
+            <div id="ctd-graph"></div>
+        </div>
 
-        <!-- ROV Video Section -->
-        <section id="rov-videos">
+        <div id="rov-videos" class="section">
             <h2>ROV Videos</h2>
             <p>Watch ROV footage with GPS coordinates and dive depths.</p>
-            <video width="600" controls>
-                <source src="videos/rov_video.mp4" type="video/mp4">
+            <video controls>
+                <source src="path_to_your_video.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-        </section>
+        </div>
 
-        <section id="map-container">
-            <div id="map" style="height: 400px;"></div>
-        </section>
-        <section id="marker-form">
+        <div id="map-container" class="section">
+            <div id="map"></div>
+        </div>
+
+        <div id="marker-form" class="section">
             <h2>Add Marker</h2>
             <form id="add-marker-form">
                 <label for="lat">Latitude:</label>
@@ -43,21 +106,26 @@
                 <input type="number" id="lng" name="lng" step="any" required>
                 <button type="submit">Add Marker</button>
             </form>
-        </section>
+        </div>
 
-        <!-- Plankton Image Gallery -->
-        <section id="plankton-gallery">
+        <div id="plankton-gallery" class="section">
             <h2>Plankton Gallery</h2>
             <p>View images of plankton samples collected at various depths and coordinates.</p>
             <img src="images/plankton1.jpg" alt="Plankton sample at [GPS coordinates]">
-        </section>
+        </div>
 
-    </main>
+        <div id="marker-details" class="section" style="display: none;">
+            <h2>Marker Details</h2>
+            <div id="marker-details-content"></div>
+        </div>
+    </div>
 
     <footer>
-        <p>&copy; 2024 Oceans10SC. All rights reserved.</p>
+        <p>© 2024 Oceans10SC. All rights reserved.</p>
     </footer>
+
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="script.js"></script>
+    <script src="questionnaire.js"></script>
 </body>
 </html>

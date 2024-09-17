@@ -1,12 +1,24 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+});
+const upload = multer({ storage: storage });
 
 // Replace with your MongoDB connection string
 const dbURI = 'mongodb+srv://apoorvapanidapu:Oceans1234!@oceans10sc-cluster.urfzm.mongodb.net/oceans10sc?retryWrites=true&w=majority';
@@ -15,18 +27,37 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Define Marker Schema and Model
+// Updated Marker Schema
 const markerSchema = new mongoose.Schema({
   lat: Number,
-  lng: Number
+  lng: Number,
+  startTime: String,
+  endTime: String,
+  depth: Number,
+  activity: String,
+  otherActivity: String,
+  notes: String,
+  media: [String]  // Array of file paths
 });
 const Marker = mongoose.model('Marker', markerSchema);
 
-// API Endpoints
-app.post('/api/markers', async (req, res) => {
+// Updated API Endpoints
+app.post('/api/markers', upload.array('media', 5), async (req, res) => {
   try {
     console.log('Received marker data:', req.body);
-    const marker = new Marker(req.body);
+    console.log('Received files:', req.files);
+
+    const markerData = {
+      ...req.body,
+      lat: parseFloat(req.body.lat),
+      lng: parseFloat(req.body.lng),
+      depth: req.body.depth ? parseFloat(req.body.depth) : undefined,
+      media: req.files ? req.files.map(file => file.path) : []
+    };
+
+    console.log('Processed marker data:', markerData);
+
+    const marker = new Marker(markerData);
     const savedMarker = await marker.save();
     console.log('Marker saved successfully:', savedMarker);
     res.status(201).json(savedMarker);
@@ -44,19 +75,34 @@ app.get('/api/markers', async (req, res) => {
     res.json(markers);
   } catch (error) {
     console.error('Error fetching markers:', error);
-    res.status(500).json({ error: 'Server error while fetching markers.' });
+    res.status(500).json({ error: 'Server error while fetching markers.', details: error.message });
   }
 });
 
 app.delete('/api/markers/:id', async (req, res) => {
   try {
-    await Marker.findByIdAndDelete(req.params.id);
-    res.status(204).send();
+    const result = await Marker.findByIdAndDelete(req.params.id);
+    if (result) {
+      console.log('Marker deleted:', req.params.id);
+      res.status(204).send();
+    } else {
+      console.log('Marker not found:', req.params.id);
+      res.status(404).json({ error: 'Marker not found.' });
+    }
   } catch (error) {
     console.error('Error deleting marker:', error);
-    res.status(500).json({ error: 'Server error while deleting marker.' });
+    res.status(500).json({ error: 'Server error while deleting marker.', details: error.message });
   }
 });
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.stack);
+  res.status(500).json({ error: 'Something went wrong!', details: err.message });
+});
+
+// Serve static files
+app.use(express.static('public'));
 
 // Export the Express API
 module.exports = app;
