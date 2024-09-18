@@ -10,7 +10,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+    <div id="video-background">
+        <video autoplay loop muted playsinline>
+            <source src="waves-back.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    
     <!-- Initial Screen (Questionnaire) -->
     <div id="initial-screen">
         <h1>Let's enter your metadata...</h1>
@@ -35,7 +41,6 @@
         </header>
 
         <main>
-
             <section id="map-container">
                 <h2>Interactive Map</h2>
                 <div id="map" style="height: 400px;"></div>
@@ -48,12 +53,11 @@
             <section id="marker-form">
                 <h2>Add Station</h2>
                 <form id="add-marker-form">
-                    <label for="label">Label:</label>
-                    <input type="text" id="label" name="label" maxlength="10">
-                    <label for="lat">Latitude:</label>
-                    <input type="number" id="lat" name="lat" step="any" required>
-                    <label for="lng">Longitude:</label>
-                    <input type="number" id="lng" name="lng" step="any" required>
+                    <input type="text" id="label" name="label" placeholder="Station Label" maxlength="10">
+                    <input type="number" id="lat" name="lat" placeholder="Latitude" step="any">
+                    <input type="number" id="lng" name="lng" placeholder="Longitude" step="any">
+                    <input type="number" id="depth" name="depth" placeholder="Depth (meters)" step="any">
+                    <input type="text" id="notes" name="notes" placeholder="Additional notes" step="any">
                     <button type="submit">Add Station</button>
                 </form>
             </section>

@@ -99,7 +99,7 @@ h2 {
 }
 
 /* Video and Map styling */
-video, #map {
+#map {
     width: 100%;
     border-radius: 8px;
     margin-top: 15px;
