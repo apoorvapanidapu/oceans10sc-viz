@@ -1,3 +1,5 @@
+let map;
+let markers = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Website loaded");
@@ -30,17 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function initializeMap() {
         // Initialize the map and set its view to Monterey Bay
-        window.map = L.map('map').setView([36.6002, -121.8947], 9);
+        map = L.map('map').setView([36.6002, -121.8947], 9);
 
         // Add a tile layer (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(window.map);
+        }).addTo(map);
 
         const apiUrl = '/api/markers';
-
-        // Array to hold marker references
-        var markers = [];
 
         // Load existing markers
         loadMarkers();
@@ -75,14 +74,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 popupAnchor: [1, -34],
                                 shadowSize: [41, 41]
                             })
-                        }).addTo(window.map);
+                        }).addTo(map);
     
                         marker.bindPopup(createPopupContent(data));
                         marker.on('click', () => showMarkerDetails(data));
                         markers.push({ marker, id: data._id });
     
                         if (isNewMarker) {
-                            window.map.setView([data.lat, data.lng], 10);
+                            map.setView([data.lat, data.lng], 10);
                             showMarkerDetails(data);
                             window.lastSubmittedMarker = null;
                         }
@@ -151,26 +150,32 @@ document.addEventListener('DOMContentLoaded', function() {
         // Function to delete a marker
         window.deleteMarker = async function(markerId) {
             if (confirm('Are you sure you want to delete this marker?')) {
+                console.log('Attempting to delete marker with ID:', markerId);
                 try {
                     const response = await fetch(`/api/markers/${markerId}`, {
                         method: 'DELETE'
                     });
-
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                    // Remove marker from the map
+        
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+                    }
+        
                     const markerIndex = markers.findIndex(m => m.id === markerId);
+                    console.log('Marker index in local array:', markerIndex);
                     if (markerIndex !== -1) {
                         map.removeLayer(markers[markerIndex].marker);
                         markers.splice(markerIndex, 1);
+                        console.log('Marker removed from map and local array');
+                    } else {
+                        console.error('Marker not found in local array:', markerId);
                     }
-
-                    // Hide marker details
+        
                     document.getElementById('marker-details').style.display = 'none';
-
+        
                     console.log('Marker deleted successfully');
                 } catch (error) {
-                    console.error('Error deleting marker:', error);
+                    console.error('Detailed error deleting marker:', error);
                     alert('Error deleting marker. Please try again.');
                 }
             }
@@ -187,19 +192,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     popupAnchor: [1, -34],
                     shadowSize: [41, 41]
                 })
-            }).addTo(window.map);
-
-        marker.bindPopup(createPopupContent(data));
-        marker.on('click', () => showMarkerDetails(data));
-
-        markers.push({ marker, id: data._id });
-        window.map.setView([data.lat, data.lng], 10);
-
-        // Show marker details
-        showMarkerDetails(data);
-
-        // Clear the lastSubmittedMarker
-        window.lastSubmittedMarker = null;
+            }).addTo(map);
+        
+            marker.bindPopup(createPopupContent(data));
+            marker.on('click', () => showMarkerDetails(data));
+        
+            // Ensure the marker has an _id property
+            if (!data._id) {
+                console.error('Marker data is missing _id:', data);
+                return;
+            }
+        
+            markers.push({ marker, id: data._id });
+            map.setView([data.lat, data.lng], 10);
+        
+            // Show marker details
+            showMarkerDetails(data);
+        
+            // Clear the lastSubmittedMarker
+            window.lastSubmittedMarker = null;
         }
 
         // Event listener for form submission
@@ -209,16 +220,18 @@ document.addEventListener('DOMContentLoaded', function() {
          async function addMarker(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
-
+        
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     body: formData
                 });
-
+        
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
+        
                 const markerData = await response.json();
+                console.log('New marker added:', markerData); // Log the entire marker data
+        
                 const marker = L.marker([markerData.lat, markerData.lng], {
                     icon: L.icon({
                         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -229,19 +242,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         shadowSize: [41, 41]
                     })
                 }).addTo(map);
-
+        
                 marker.bindPopup(createPopupContent(markerData));
                 marker.on('click', () => showMarkerDetails(markerData));
-
+        
                 markers.push({ marker, id: markerData._id });
+                console.log('Marker added to local array:', { id: markerData._id, lat: markerData.lat, lng: markerData.lng });
+        
                 map.setView([markerData.lat, markerData.lng], 10);
-
-                // Show marker details
+        
                 showMarkerDetails(markerData);
-
-                // Clear the form after successful submission
+        
                 e.target.reset();
-
+        
             } catch (error) {
                 console.error('Error adding marker:', error);
                 alert('Error adding marker. Please try again.');

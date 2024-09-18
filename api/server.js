@@ -82,8 +82,10 @@ app.get('/api/markers', async (req, res) => {
 });
 
 app.delete('/api/markers/:id', async (req, res) => {
+  console.log('Delete request received for marker ID:', req.params.id);
   try {
     const result = await Marker.findByIdAndDelete(req.params.id);
+    console.log('Delete operation result:', result);
     if (result) {
       console.log('Marker deleted:', req.params.id);
       res.status(204).send();
