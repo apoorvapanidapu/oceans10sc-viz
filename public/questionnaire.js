@@ -177,6 +177,7 @@ function submitQuestionnaire() {
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => {
+                    console.error('Server response:', text);
                     throw new Error(text || `HTTP error! Status: ${response.status}`);
                 });
             }
@@ -192,7 +193,9 @@ function submitQuestionnaire() {
             showMainContent();
         })
         .catch((error) => {
-            console.error('Error:', error);
+            console.error('Error object:', error);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
             alert('An error occurred: ' + error.message);
         });
     }

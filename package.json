@@ -7,7 +7,10 @@
     "start": "node api/server.js"
   },
   "dependencies": {
-    "@vercel/blob": "^0.16.0",
+    "@aws-sdk/client-s3": "^3.651.1",
+    "@aws-sdk/lib-storage": "^3.651.1",
+    "@aws-sdk/s3-request-presigner": "^3.651.1",
+    "aws-sdk": "^2.1691.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

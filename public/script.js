@@ -121,20 +121,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 ${data.otherActivity ? `<p><b>Other Activity:</b> ${data.otherActivity}</p>` : ''}
                 <p><b>Notes:</b> ${data.notes || 'N/A'}</p>
             `;
-            
+    
             // Display uploaded media
             if (data.media && data.media.length > 0) {
                 contentDiv.innerHTML += '<h4>Uploaded Media:</h4>';
-                data.media.forEach(mediaPath => {
-                    if (mediaPath.match(/\.(jpeg|jpg|gif|png)$/i)) {
-                        contentDiv.innerHTML += `<img src="${mediaPath}" alt="Uploaded image" style="max-width: 100%; height: auto;">`;
-                    } else if (mediaPath.match(/\.(mp4|webm|ogg)$/i)) {
+                data.media.forEach(mediaUrl => {
+                    if (mediaUrl.toLowerCase().match(/\.(jpeg|jpg|gif|png)$/)) {
+                        contentDiv.innerHTML += `<img src="${mediaUrl}" alt="Uploaded image" style="max-width: 100%; height: auto;">`;
+                    } else if (mediaUrl.toLowerCase().match(/\.(mp4|webm|ogg)$/)) {
                         contentDiv.innerHTML += `
                             <video controls style="max-width: 100%; height: auto;">
-                                <source src="${mediaPath}" type="video/${mediaPath.split('.').pop()}">
+                                <source src="${mediaUrl}" type="video/${mediaUrl.split('.').pop().toLowerCase()}">
                                 Your browser does not support the video tag.
                             </video>
                         `;
+                    } else {
+                        contentDiv.innerHTML += `<p>Unsupported media type: <a href="${mediaUrl}" target="_blank">View File</a></p>`;
                     }
                 });
             }

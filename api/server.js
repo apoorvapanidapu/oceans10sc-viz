@@ -2,32 +2,35 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
-const path = require('path');
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/')
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname))
-    }
+// Configure AWS
+const s3Client = new S3Client({
+  region: "us-west-1",  // Hardcode this to match your bucket's region
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  }
 });
-const upload = multer({ storage: storage });
+
+const getPublicUrl = (bucket, key) => `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+
+// Configure multer for memory storage
+const upload = multer({ storage: multer.memoryStorage() });
 
 require('dotenv').config();
 
-// Replace hardcoded MongoDB URI with the one from the .env file
+// MongoDB connection (make sure you're using the updated connection string)
 const dbURI = process.env.MONGODB_URI;
-
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch((err) => console.error('MongoDB connection error:', err));
+
 
 // Updated Marker Schema
 const markerSchema = new mongoose.Schema({
@@ -39,7 +42,7 @@ const markerSchema = new mongoose.Schema({
   activity: String,
   otherActivity: String,
   notes: String,
-  media: [String]  // Array of file paths
+  media: [String]  // Array of S3 URLs
 });
 const Marker = mongoose.model('Marker', markerSchema);
 
@@ -49,12 +52,38 @@ app.post('/api/markers', upload.array('media', 5), async (req, res) => {
     console.log('Received marker data:', req.body);
     console.log('Received files:', req.files);
 
+    const mediaUrls = await Promise.all(req.files.map(async (file) => {
+      const key = `uploads/${Date.now()}-${file.originalname}`;
+      const params = {
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: key,
+        Body: file.buffer,
+        ContentType: file.mimetype
+      };
+      
+      console.log('S3 upload params:', JSON.stringify(params, null, 2));
+
+      try {
+        const command = new PutObjectCommand(params);
+        const response = await s3Client.send(command);
+        console.log('S3 upload response:', JSON.stringify(response, null, 2));
+        
+        // Generate the public URL
+        const publicUrl = getPublicUrl(process.env.S3_BUCKET_NAME, key);
+        
+        return publicUrl;
+      } catch (uploadError) {
+        console.error('S3 upload error:', uploadError);
+        throw new Error(`S3 upload failed: ${uploadError.message}`);
+      }
+    }));
+
     const markerData = {
       ...req.body,
       lat: parseFloat(req.body.lat),
       lng: parseFloat(req.body.lng),
       depth: req.body.depth && req.body.depth !== '' ? parseFloat(req.body.depth) : undefined,
-      media: req.files ? req.files.map(file => file.path) : []
+      media: mediaUrls
     };
 
     console.log('Processed marker data:', markerData);
