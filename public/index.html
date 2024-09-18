@@ -35,20 +35,6 @@
         </header>
 
         <main>
-            <section id="ctd-data">
-                <h2>CTD Data</h2>
-                <p>Visualize temperature, salinity, and depth from our research expeditions.</p>
-                <div id="ctd-graph"></div>
-            </section>
-
-            <section id="rov-videos">
-                <h2>ROV Videos</h2>
-                <p>Watch ROV footage with GPS coordinates and dive depths.</p>
-                <video controls>
-                    <source src="path_to_your_video.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </section>
 
             <section id="map-container">
                 <h2>Interactive Map</h2>
@@ -62,12 +48,31 @@
             <section id="marker-form">
                 <h2>Add Station</h2>
                 <form id="add-marker-form">
+                    <label for="label">Label:</label>
+                    <input type="text" id="label" name="label" maxlength="10">
                     <label for="lat">Latitude:</label>
                     <input type="number" id="lat" name="lat" step="any" required>
                     <label for="lng">Longitude:</label>
                     <input type="number" id="lng" name="lng" step="any" required>
                     <button type="submit">Add Station</button>
                 </form>
+            </section>
+
+            <h2>Add Station</h2>
+            
+            <section id="ctd-data">
+                <h2>CTD Data</h2>
+                <p>Visualize temperature, salinity, and depth from our research expeditions.</p>
+                <div id="ctd-graph"></div>
+            </section>
+
+            <section id="rov-videos">
+                <h2>ROV Videos</h2>
+                <p>Watch ROV footage with GPS coordinates and dive depths.</p>
+                <video controls>
+                    <source src="path_to_your_video.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
             </section>
 
             <section id="plankton-gallery">

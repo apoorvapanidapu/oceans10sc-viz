@@ -60,31 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 markerData.forEach((data) => {
                     if (data && typeof data.lat === 'number' && typeof data.lng === 'number') {
-                        let isNewMarker = window.lastSubmittedMarker && 
-                                          data._id === window.lastSubmittedMarker._id;
-                        
-                        const marker = L.marker([data.lat, data.lng], {
-                            icon: L.icon({
-                                iconUrl: isNewMarker ? 
-                                    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png' : 
-                                    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 41],
-                                popupAnchor: [1, -34],
-                                shadowSize: [41, 41],
-                            })
-                        }).addTo(map);
-        
-                        marker.bindPopup(createPopupContent(data));
-                        marker.on('click', () => showMarkerDetails(data));
-                        markers.push({ marker: marker, id: data._id });  // Store the Leaflet marker object
-        
-                        if (isNewMarker) {
-                            map.setView([data.lat, data.lng], 10);
-                            showMarkerDetails(data);
-                            window.lastSubmittedMarker = null;
-                        }
+                        addMarkerToMap(data);
                     } else {
                         console.error('Invalid marker data:', data);
                     }
@@ -93,6 +69,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Markers loading complete');
             } catch (error) {
                 console.error('Error loading markers:', error);
+            }
+        }
+    
+        function addMarkerToMap(data) {
+            const isNewMarker = window.lastSubmittedMarker && 
+                                data._id === window.lastSubmittedMarker._id;
+            
+            const marker = L.marker([data.lat, data.lng], {
+                icon: L.icon({
+                    iconUrl: isNewMarker ? 
+                        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png' : 
+                        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+        
+            // Add a label to the marker
+            // Updated label creation
+            const label = L.divIcon({
+                className: 'marker-label',
+                html: `<div>${data.label || data.activity}</div>`,
+                iconSize: null
+            });
+            L.marker([data.lat, data.lng], { icon: label, zIndexOffset: 1000 }).addTo(map);
+
+            marker.bindPopup(createPopupContent(data));
+            marker.on('click', () => showMarkerDetails(data, marker));
+            markers.push({ marker: marker, id: data._id });
+        
+            if (isNewMarker) {
+                map.setView([data.lat, data.lng], 10);
+                showMarkerDetails(data, marker);
+                window.lastSubmittedMarker = null;
             }
         }
 
@@ -113,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const contentDiv = document.getElementById('marker-details-content');
             contentDiv.innerHTML = `
                 <h3>Marker Details</h3>
+                <p><b>Label:</b> ${data.label || data.activity}</p>
                 <p><b>Location:</b> ${data.lat}, ${data.lng}</p>
                 <p><b>Start Time:</b> ${data.startTime || 'N/A'}</p>
                 <p><b>End Time:</b> ${data.endTime || 'N/A'}</p>
@@ -121,6 +135,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 ${data.otherActivity ? `<p><b>Other Activity:</b> ${data.otherActivity}</p>` : ''}
                 <p><b>Notes:</b> ${data.notes || 'N/A'}</p>
             `;
+
+            if (data.fileLink) {
+                contentDiv.innerHTML += `<p><b>File Link:</b> <a href="${data.fileLink}" target="_blank">View File</a></p>`;
+            }
     
             // Display uploaded media
             if (data.media && data.media.length > 0) {
@@ -226,48 +244,37 @@ document.addEventListener('DOMContentLoaded', function() {
         // Event listener for form submission
         document.getElementById('add-marker-form').addEventListener('submit', addMarker);
 
-         // Function to add a marker
-         async function addMarker(e) {
+        
+        // Function to add a marker
+        async function addMarker(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
-        
+            
             try {
-                const response = await fetch(apiUrl, {
+                const response = await fetch('/api/markers', {
                     method: 'POST',
                     body: formData
                 });
         
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorData.error}`);
+                }
         
                 const markerData = await response.json();
                 console.log('New marker added:', markerData);
         
-                const marker = L.marker([markerData.lat, markerData.lng], {
-                    icon: L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowSize: [41, 41]
-                    })
-                }).addTo(map);
-        
-                marker.bindPopup(createPopupContent(markerData));
-                marker.on('click', () => showMarkerDetails(markerData, marker));  // Pass the marker object
-        
-                markers.push({ marker, id: markerData._id });
-                console.log('Marker added to local array:', { id: markerData._id, lat: markerData.lat, lng: markerData.lng });
+                addMarkerToMap(markerData);
         
                 map.setView([markerData.lat, markerData.lng], 10);
         
-                showMarkerDetails(markerData, marker);  // Pass the marker object
+                showMarkerDetails(markerData);
         
                 e.target.reset();
         
             } catch (error) {
                 console.error('Error adding marker:', error);
-                alert('Error adding marker. Please try again.');
+                alert('Error adding marker: ' + error.message);
             }
         }
 

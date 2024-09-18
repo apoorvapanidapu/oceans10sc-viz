@@ -69,6 +69,11 @@ body {
     font-size: 1em;
 }
 
+#questionnaire button:hover, #add-marker-form button:hover, #marker-details button:hover, #initial-screen button:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
 #back-button, #next-button, #submit-button {
     display: none; /* Initially hide all buttons */
 }
@@ -110,6 +115,40 @@ video, #map {
 
 #add-marker-form label {
     margin-top: 10px;
+}
+
+/*
+.marker-label div {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 3px;
+    padding: 2px;
+    white-space: nowrap;
+    
+}
+*/
+
+.marker-label {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.marker-label div {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #666;
+    border-radius: 3px;
+    color: #333;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 5px;
+    white-space: nowrap;
+    display: flex;
+    transform: translate(-50%, 5%);
+    max-width: 120px; /* Adjust this value to change the maximum width of the label */
+    text-align: center;
 }
 
 #add-marker-form input {

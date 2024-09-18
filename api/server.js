@@ -42,11 +42,12 @@ const markerSchema = new mongoose.Schema({
   activity: String,
   otherActivity: String,
   notes: String,
-  media: [String]  // Array of S3 URLs
+  media: [String],
+  fileLink: String,
+  label: String
 });
 const Marker = mongoose.model('Marker', markerSchema);
 
-// Updated API Endpoints
 app.post('/api/markers', upload.array('media', 5), async (req, res) => {
   try {
     console.log('Received marker data:', req.body);
@@ -68,10 +69,7 @@ app.post('/api/markers', upload.array('media', 5), async (req, res) => {
         const response = await s3Client.send(command);
         console.log('S3 upload response:', JSON.stringify(response, null, 2));
         
-        // Generate the public URL
-        const publicUrl = getPublicUrl(process.env.S3_BUCKET_NAME, key);
-        
-        return publicUrl;
+        return getPublicUrl(process.env.S3_BUCKET_NAME, key);
       } catch (uploadError) {
         console.error('S3 upload error:', uploadError);
         throw new Error(`S3 upload failed: ${uploadError.message}`);
@@ -83,7 +81,8 @@ app.post('/api/markers', upload.array('media', 5), async (req, res) => {
       lat: parseFloat(req.body.lat),
       lng: parseFloat(req.body.lng),
       depth: req.body.depth && req.body.depth !== '' ? parseFloat(req.body.depth) : undefined,
-      media: mediaUrls
+      media: mediaUrls,
+      label: req.body.label || req.body.activity
     };
 
     console.log('Processed marker data:', markerData);

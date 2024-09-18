@@ -15,6 +15,7 @@ const questions = [
         type: "activity",
         required: false
     },
+
     {
         title: "Additional Notes:",
         type: "notes",
@@ -62,6 +63,7 @@ function showQuestion(index) {
                 </select>
                 <input type="text" id="other-activity" placeholder="Describe other activity" style="display: none;" value="${answers.otherActivity || ''}">
                 <input type="file" id="media-upload" multiple accept="image/*,video/*">
+                <input type="url" id="file-link" placeholder="Enter file link (optional)" value="${answers.fileLink || ''}">
             `;
             document.getElementById('activity').addEventListener('change', function() {
                 document.getElementById('other-activity').style.display = this.value === 'Other' ? 'block' : 'none';
@@ -147,6 +149,7 @@ function saveAnswer(index) {
                 answers.otherActivity = document.getElementById('other-activity').value;
             }
             answers.media = document.getElementById('media-upload').files;
+            answers.fileLink = document.getElementById('file-link').value;
             break;
         case 'notes':
             answers.notes = document.getElementById('notes').value;
