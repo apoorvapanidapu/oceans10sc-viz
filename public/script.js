@@ -4,7 +4,7 @@ let markers = [];
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Website loaded");
 
-    // Check if the user has already gone through the questionnaire
+    // questionnaire on refresh
     showInitialScreen();
 
     document.getElementById('yes-button').addEventListener('click', startQuestionnaire);
@@ -72,14 +72,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 iconSize: [25, 41],
                                 iconAnchor: [12, 41],
                                 popupAnchor: [1, -34],
-                                shadowSize: [41, 41]
+                                shadowSize: [41, 41],
                             })
                         }).addTo(map);
-    
+        
                         marker.bindPopup(createPopupContent(data));
                         marker.on('click', () => showMarkerDetails(data));
-                        markers.push({ marker, id: data._id });
-    
+                        markers.push({ marker: marker, id: data._id });  // Store the Leaflet marker object
+        
                         if (isNewMarker) {
                             map.setView([data.lat, data.lng], 10);
                             showMarkerDetails(data);
@@ -101,14 +101,14 @@ document.addEventListener('DOMContentLoaded', function() {
         function createPopupContent(data) {
             return `
                 <b>Location:</b> ${data.lat}, ${data.lng}<br>
-                <b>Start Time:</b> ${data.startTime || 'N/A'}<br>
+                <b>Time:</b> ${data.startTime || 'N/A'}<br>
                 <b>Activity:</b> ${data.activity || 'N/A'}<br>
                 <b>Depth:</b> ${data.depth ? data.depth + ' m' : 'N/A'}
             `;
         }
 
         // Function to show marker details
-        function showMarkerDetails(data) {
+        function showMarkerDetails(data, markerObj) {
             const detailsDiv = document.getElementById('marker-details');
             const contentDiv = document.getElementById('marker-details-content');
             contentDiv.innerHTML = `
@@ -126,9 +126,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.media && data.media.length > 0) {
                 contentDiv.innerHTML += '<h4>Uploaded Media:</h4>';
                 data.media.forEach(mediaPath => {
-                    if (mediaPath.match(/\.(jpeg|jpg|gif|png)$/)) {
+                    if (mediaPath.match(/\.(jpeg|jpg|gif|png)$/i)) {
                         contentDiv.innerHTML += `<img src="${mediaPath}" alt="Uploaded image" style="max-width: 100%; height: auto;">`;
-                    } else if (mediaPath.match(/\.(mp4|webm|ogg)$/)) {
+                    } else if (mediaPath.match(/\.(mp4|webm|ogg)$/i)) {
                         contentDiv.innerHTML += `
                             <video controls style="max-width: 100%; height: auto;">
                                 <source src="${mediaPath}" type="video/${mediaPath.split('.').pop()}">
@@ -138,14 +138,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             }
-
+        
             // Add delete button
             contentDiv.innerHTML += `
-                <button onclick="deleteMarker('${data._id}')">Delete Marker</button>
+                <button id="delete-marker-btn">Delete Marker</button>
             `;
-
+        
             detailsDiv.style.display = 'block';
+        
+            // Add click event listener to the delete button
+            document.getElementById('delete-marker-btn').addEventListener('click', () => deleteMarker(data._id, markerObj));
         }
+        
 
         // Function to delete a marker
         window.deleteMarker = async function(markerId) {
@@ -164,7 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const markerIndex = markers.findIndex(m => m.id === markerId);
                     console.log('Marker index in local array:', markerIndex);
                     if (markerIndex !== -1) {
-                        map.removeLayer(markers[markerIndex].marker);
+                        const markerToRemove = markers[markerIndex].marker;
+                        map.removeLayer(markerToRemove);
                         markers.splice(markerIndex, 1);
                         console.log('Marker removed from map and local array');
                     } else {
@@ -172,6 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
         
                     document.getElementById('marker-details').style.display = 'none';
+        
+                    // Force a map update
+                    map.invalidateSize();
         
                     console.log('Marker deleted successfully');
                 } catch (error) {
@@ -195,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }).addTo(map);
         
             marker.bindPopup(createPopupContent(data));
-            marker.on('click', () => showMarkerDetails(data));
+            marker.on('click', () => showMarkerDetails(data, marker));  // Pass the marker object
         
             // Ensure the marker has an _id property
             if (!data._id) {
@@ -203,11 +211,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
         
-            markers.push({ marker, id: data._id });
+            markers.push({ marker: marker, id: data._id });
             map.setView([data.lat, data.lng], 10);
         
             // Show marker details
-            showMarkerDetails(data);
+            showMarkerDetails(data, marker);  // Pass the marker object
         
             // Clear the lastSubmittedMarker
             window.lastSubmittedMarker = null;
@@ -230,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         
                 const markerData = await response.json();
-                console.log('New marker added:', markerData); // Log the entire marker data
+                console.log('New marker added:', markerData);
         
                 const marker = L.marker([markerData.lat, markerData.lng], {
                     icon: L.icon({
@@ -244,14 +252,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).addTo(map);
         
                 marker.bindPopup(createPopupContent(markerData));
-                marker.on('click', () => showMarkerDetails(markerData));
+                marker.on('click', () => showMarkerDetails(markerData, marker));  // Pass the marker object
         
                 markers.push({ marker, id: markerData._id });
                 console.log('Marker added to local array:', { id: markerData._id, lat: markerData.lat, lng: markerData.lng });
         
                 map.setView([markerData.lat, markerData.lng], 10);
         
-                showMarkerDetails(markerData);
+                showMarkerDetails(markerData, marker);  // Pass the marker object
         
                 e.target.reset();
         
