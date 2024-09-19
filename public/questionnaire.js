@@ -59,6 +59,7 @@ function showQuestion(index) {
                     <option value="CTD" ${answers.activity === 'CTD' ? 'selected' : ''}>CTD</option>
                     <option value="ROV" ${answers.activity === 'ROV' ? 'selected' : ''}>ROV</option>
                     <option value="Plankton Tow" ${answers.activity === 'Plankton Tow' ? 'selected' : ''}>Plankton Tow</option>
+                    <option value="Echosounder" ${answers.activity === 'Echosounder' ? 'selected' : ''}>Echosounder</option>
                     <option value="Other" ${answers.activity === 'Other' ? 'selected' : ''}>Other</option>
                 </select>
                 <input type="text" id="other-activity" placeholder="Describe other activity" style="display: none;" value="${answers.otherActivity || ''}">

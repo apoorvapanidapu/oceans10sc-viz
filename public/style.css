@@ -8,6 +8,29 @@ body {
     background-color: #f4f4f4;
 }
 
+#video-background {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -1000;
+    overflow: hidden;
+}
+
+#video-background video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+}
+
 /* Initial Screen and Questionnaire styling */
 #initial-screen {
     background-color: #000;
@@ -80,6 +103,8 @@ body {
 
 /* Main content styling */
 #main-content {
+    background-color: #f4f4f4;
+    z-index: 2;
     margin: 20px auto;
     width: 90%;
     max-width: 1000px;

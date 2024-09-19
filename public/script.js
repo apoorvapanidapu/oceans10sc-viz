@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function initializeMap() {
         // Initialize the map and set its view to Monterey Bay
-        map = L.map('map').setView([36.6002, -121.8947], 9);
+        map = L.map('map').setView([36.74, -121.91], 12);
 
         // Add a tile layer (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -161,12 +161,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
             // Add delete button
             contentDiv.innerHTML += `
+                <button id="edit-marker-btn">Edit Marker</button>
                 <button id="delete-marker-btn">Delete Marker</button>
             `;
         
             detailsDiv.style.display = 'block';
         
             // Add click event listener to the delete button
+            document.getElementById('edit-marker-btn').addEventListener('click', () => showEditMarkerForm(data));
             document.getElementById('delete-marker-btn').addEventListener('click', () => deleteMarker(data._id, markerObj));
         }
         
@@ -275,6 +277,100 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Error adding marker:', error);
                 alert('Error adding marker: ' + error.message);
+            }
+        }
+
+        function showEditMarkerForm(data) {
+            const contentDiv = document.getElementById('marker-details-content');
+            contentDiv.innerHTML = `
+                <h3>Edit Marker</h3>
+                <form id="edit-marker-form">
+                    <input type="hidden" name="id" value="${data._id}">
+                    <label for="edit-lat">Latitude:</label>
+                    <input type="number" id="edit-lat" name="lat" value="${data.lat}" step="any" required>
+                    <p><label for="edit-lng">Longitude:</label>
+                    <input type="number" id="edit-lng" name="lng" value="${data.lng}" step="any" required></p>
+                    <p><label for="edit-start-time">Start Time:</label>
+                    <input type="datetime-local" id="edit-start-time" name="startTime" value="${data.startTime || ''}"></p>
+                    <p><label for="edit-end-time">End Time:</label>
+                    <input type="datetime-local" id="edit-end-time" name="endTime" value="${data.endTime || ''}"></p>
+                    <p><label for="edit-depth">Depth (m):</label>
+                    <input type="number" id="edit-depth" name="depth" value="${data.depth || ''}" step="any"></p>
+                    <p><label for="edit-activity">Activity:</label>
+                    <select id="edit-activity" name="activity">
+                        <option value="CTD" ${data.activity === 'CTD' ? 'selected' : ''}>CTD</option>
+                        <option value="ROV" ${data.activity === 'ROV' ? 'selected' : ''}>ROV</option>
+                        <option value="Plankton Tow" ${data.activity === 'Plankton Tow' ? 'selected' : ''}>Plankton Tow</option>
+                        <option value="Echosounder" ${data.activity === 'Echosounder' ? 'selected' : ''}>Echosounder</option>
+                        <option value="Other" ${data.activity === 'Other' ? 'selected' : ''}>Other</option>
+                    </select>
+                    <input type="text" id="edit-other-activity" name="otherActivity" value="${data.otherActivity || ''}" placeholder="Describe other activity" style="display: ${data.activity === 'Other' ? 'block' : 'none'};"></p>
+                    <p><label for="edit-notes">Notes:</label>
+                    <textarea id="edit-notes" name="notes">${data.notes || ''}</textarea></p>
+                    <p><label for="edit-file-link">File Link:</label>
+                    <input type="url" id="edit-file-link" name="fileLink" value="${data.fileLink || ''}"></p>
+                    <p><button type="submit">Save Changes</button></p>
+                </form>
+            `;
+        
+            document.getElementById('edit-activity').addEventListener('change', function() {
+                document.getElementById('edit-other-activity').style.display = this.value === 'Other' ? 'block' : 'none';
+            });
+        
+            document.getElementById('edit-marker-form').addEventListener('submit', updateMarker);
+        }
+
+        async function updateMarker(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const markerId = formData.get('id');
+        
+            try {
+                const response = await fetch(`/api/markers/${markerId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(Object.fromEntries(formData)),
+                });
+        
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorData.error}`);
+                }
+        
+                const updatedMarkerData = await response.json();
+                console.log('Marker updated:', updatedMarkerData);
+        
+                // Update the marker on the map and in the local array
+                const markerIndex = markers.findIndex(m => m.id === markerId);
+                if (markerIndex !== -1) {
+                    const marker = markers[markerIndex].marker;
+                    
+                    // Update marker position
+                    marker.setLatLng([updatedMarkerData.lat, updatedMarkerData.lng]);
+                    
+                    // Update popup content
+                    const newPopupContent = createPopupContent(updatedMarkerData);
+                    marker.setPopupContent(newPopupContent);
+                    
+                    // Update the marker data in the local array
+                    markers[markerIndex] = { ...markers[markerIndex], ...updatedMarkerData };
+        
+                    // Refresh the marker details display
+                    showMarkerDetails(updatedMarkerData, marker);
+                }
+        
+                // Refresh the map
+                map.invalidateSize();
+        
+                // Refresh media sections
+                const allMarkers = await (await fetch('/api/markers')).json();
+                populateMediaSections(allMarkers);
+        
+            } catch (error) {
+                console.error('Error updating marker:', error);
+                alert('Error updating marker: ' + error.message);
             }
         }
 

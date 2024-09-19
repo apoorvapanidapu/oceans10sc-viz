@@ -127,6 +127,20 @@ app.delete('/api/markers/:id', async (req, res) => {
   }
 });
 
+app.put('/api/markers/:id', async (req, res) => {
+  try {
+    const updatedMarker = await Marker.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (updatedMarker) {
+      res.json(updatedMarker);
+    } else {
+      res.status(404).json({ error: 'Marker not found.' });
+    }
+  } catch (error) {
+    console.error('Error updating marker:', error);
+    res.status(500).json({ error: 'Server error while updating marker.', details: error.message });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.stack);

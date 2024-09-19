@@ -16,7 +16,6 @@
             Your browser does not support the video tag.
         </video>
     </div>
-    
     <!-- Initial Screen (Questionnaire) -->
     <div id="initial-screen">
         <h1>Let's enter your metadata...</h1>
@@ -37,7 +36,7 @@
     <div id="main-content">
         <header>
             <h1>Oceans 10SC x Western Flyer Metadata Visualization</h1>
-            <p>Explore CTD data, ROV videos, and plankton images at specific GPS coordinates.</p>
+            <p>Explore CTD data, ROV videos, Echosounder data, and plankton images at specific GPS coordinates.</p>
         </header>
 
         <main>
@@ -53,7 +52,7 @@
             <section id="marker-form">
                 <h2>Add Station</h2>
                 <form id="add-marker-form">
-                    <input type="text" id="label" name="label" placeholder="Station Label" maxlength="10">
+                    <input type="text" id="label" name="label" placeholder="Station Label" maxlength="20">
                     <input type="number" id="lat" name="lat" placeholder="Latitude" step="any">
                     <input type="number" id="lng" name="lng" placeholder="Longitude" step="any">
                     <input type="number" id="depth" name="depth" placeholder="Depth (meters)" step="any">
@@ -61,9 +60,9 @@
                     <button type="submit">Add Station</button>
                 </form>
             </section>
-
-            <h2>Add Station</h2>
             
+            <!-- 
+
             <section id="ctd-data">
                 <h2>CTD Data</h2>
                 <p>Visualize temperature, salinity, and depth from our research expeditions.</p>
@@ -84,6 +83,7 @@
                 <p>View images of plankton samples collected at various depths and coordinates.</p>
                 <img src="images/plankton1.jpg" alt="Plankton sample at [GPS coordinates]">
             </section>
+            -->
         </main>
     </div>
 
@@ -94,5 +94,6 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="questionnaire.js"></script>
     <script src="script.js"></script>
+    <script src="/waves-back.mp4"></script>
 </body>
 </html>
