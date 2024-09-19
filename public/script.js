@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function initializeMap() {
         // Initialize the map and set its view to Monterey Bay
-        map = L.map('map').setView([36.789, -121.804], 10);
+        map = L.map('map').setView([36.789, -122], 10);
 
         // Add a tile layer (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -66,16 +66,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     const section = sections[marker.activity];
                     if (section) {
                         marker.media.forEach(mediaUrl => {
-                            if (mediaUrl.match(/\.(jpeg|jpg|gif|png)$/i)) {
-                                section.innerHTML += `<img src="${mediaUrl}" alt="Image from ${marker.activity}" class="media-item">`;
-                            } else if (mediaUrl.match(/\.(mp4|webm|ogg)$/i)) {
-                                section.innerHTML += `
-                                    <video controls class="media-item">
-                                        <source src="${mediaUrl}" type="video/${mediaUrl.split('.').pop().toLowerCase()}">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                `;
+                            const mediaElement = document.createElement(mediaUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? 'img' : 'video');
+                            mediaElement.src = mediaUrl;
+                            mediaElement.alt = `Media from ${marker.activity}`;
+                            mediaElement.className = 'media-item';
+                            if (mediaElement.tagName === 'VIDEO') {
+                                mediaElement.controls = true;
                             }
+                            
+                            // Add click event listener
+                            mediaElement.addEventListener('click', () => {
+                                // Center the map on the marker
+                                map.setView([marker.lat, marker.lng], 10);
+                                
+                                // Find the corresponding marker object
+                                const markerObj = markers.find(m => m.id === marker._id).marker;
+                                
+                                // Show marker details
+                                showMarkerDetails(marker, markerObj);
+                                
+                                // Open the popup
+                                markerObj.openPopup();
+                            });
+                            
+                            section.appendChild(mediaElement);
                         });
                     }
                 }
@@ -125,15 +139,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             }).addTo(map);
         
-            // Add a label to the marker
-            // Updated label creation
             const label = L.divIcon({
                 className: 'marker-label',
                 html: `<div>${data.label || data.activity}</div>`,
                 iconSize: null
             });
             L.marker([data.lat, data.lng], { icon: label, zIndexOffset: 1000 }).addTo(map);
-
+        
             marker.bindPopup(createPopupContent(data));
             marker.on('click', () => showMarkerDetails(data, marker));
             markers.push({ marker: marker, id: data._id });
