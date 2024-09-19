@@ -123,39 +123,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         function addMarkerToMap(data) {
-            const isNewMarker = window.lastSubmittedMarker && 
-                                data._id === window.lastSubmittedMarker._id;
-            
-            const marker = L.marker([data.lat, data.lng], {
-                icon: L.icon({
-                    iconUrl: isNewMarker ? 
-                        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png' : 
-                        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-        
-            const label = L.divIcon({
-                className: 'marker-label',
-                html: `<div>${data.label || data.activity}</div>`,
-                iconSize: null
-            });
-            L.marker([data.lat, data.lng], { icon: label, zIndexOffset: 1000 }).addTo(map);
-        
-            marker.bindPopup(createPopupContent(data));
-            marker.on('click', () => showMarkerDetails(data, marker));
-            markers.push({ marker: marker, id: data._id });
-        
-            if (isNewMarker) {
-                map.setView([data.lat, data.lng], 10);
-                showMarkerDetails(data, marker);
-                window.lastSubmittedMarker = null;
-            }
-        }
+    const isNewMarker = window.lastSubmittedMarker && 
+                        data._id === window.lastSubmittedMarker._id;
+    
+    const marker = L.marker([data.lat, data.lng], {
+        icon: L.icon({
+            iconUrl: isNewMarker ? 
+                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png' : 
+                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        })
+    }).addTo(map);
+
+    const label = L.divIcon({
+        className: 'marker-label',
+        html: `<div>${data.label || data.activity}</div>`,
+        iconSize: null
+    });
+    L.marker([data.lat, data.lng], { icon: label, zIndexOffset: 1000 }).addTo(map);
+
+    marker.bindPopup(createPopupContent(data));
+    marker.on('click', () => showMarkerDetails(data, marker));
+    markers.push({ marker: marker, id: data._id });
+
+    if (isNewMarker) {
+        map.setView([data.lat, data.lng], 10);
+        showMarkerDetails(data, marker);
+        window.lastSubmittedMarker = null;
+    }
+}
 
 
         // Function to create popup content

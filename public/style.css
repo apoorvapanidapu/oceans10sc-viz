@@ -8,6 +8,8 @@ body {
     background-color: #f4f4f4;
 }
 
+/* ... other styles ... */
+
 #video-background {
     position: fixed;
     right: 0;
@@ -31,9 +33,8 @@ body {
     height: auto;
 }
 
-/* Initial Screen and Questionnaire styling */
-#initial-screen {
-    background-color: #000;
+#initial-screen, #questionnaire {
+    background-color: rgba(0,0,0); 
     color: rgb(228, 238, 228);
     height: 100vh;
     display: flex;
@@ -41,6 +42,8 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+/* ... other styles ... */
 
 #initial-screen h1 {
     font-size: 2.5em;
