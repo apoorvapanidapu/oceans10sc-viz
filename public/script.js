@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function initializeMap() {
         // Initialize the map and set its view to Monterey Bay
-        map = L.map('map').setView([36.74, -121.91], 12);
+        map = L.map('map').setView([36.789, -121.804], 10);
 
         // Add a tile layer (OpenStreetMap)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -47,6 +47,39 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if there's a lastSubmittedMarker and add it
         if (window.lastSubmittedMarker) {
             addSubmittedMarker(window.lastSubmittedMarker);
+        }
+
+        function populateMediaSections(markers) {
+            const sections = {
+                'CTD': document.querySelector('#ctd-data .media-container'),
+                'ROV': document.querySelector('#rov-videos .media-container'),
+                'Plankton Tow': document.querySelector('#plankton-images .media-container'),
+                'Echosounder': document.querySelector('#echosounder-data .media-container'),
+                'Other': document.querySelector('#other-data .media-container')
+            };
+        
+            // Clear existing content
+            Object.values(sections).forEach(section => section.innerHTML = '');
+        
+            markers.forEach(marker => {
+                if (marker.media && marker.media.length > 0) {
+                    const section = sections[marker.activity];
+                    if (section) {
+                        marker.media.forEach(mediaUrl => {
+                            if (mediaUrl.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                                section.innerHTML += `<img src="${mediaUrl}" alt="Image from ${marker.activity}" class="media-item">`;
+                            } else if (mediaUrl.match(/\.(mp4|webm|ogg)$/i)) {
+                                section.innerHTML += `
+                                    <video controls class="media-item">
+                                        <source src="${mediaUrl}" type="video/${mediaUrl.split('.').pop().toLowerCase()}">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                `;
+                            }
+                        });
+                    }
+                }
+            });
         }
 
         async function loadMarkers() {
@@ -66,12 +99,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 
+                // Populate media sections
+                populateMediaSections(markerData);
+                
                 console.log('Markers loading complete');
             } catch (error) {
                 console.error('Error loading markers:', error);
             }
         }
-    
+        
         function addMarkerToMap(data) {
             const isNewMarker = window.lastSubmittedMarker && 
                                 data._id === window.lastSubmittedMarker._id;
@@ -124,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function showMarkerDetails(data, markerObj) {
             const detailsDiv = document.getElementById('marker-details');
             const contentDiv = document.getElementById('marker-details-content');
+            
             contentDiv.innerHTML = `
                 <h3>Marker Details</h3>
                 <p><b>Label:</b> ${data.label || data.activity}</p>
@@ -135,11 +172,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 ${data.otherActivity ? `<p><b>Other Activity:</b> ${data.otherActivity}</p>` : ''}
                 <p><b>Notes:</b> ${data.notes || 'N/A'}</p>
             `;
-
+        
             if (data.fileLink) {
                 contentDiv.innerHTML += `<p><b>File Link:</b> <a href="${data.fileLink}" target="_blank">View File</a></p>`;
             }
-    
+        
             // Display uploaded media
             if (data.media && data.media.length > 0) {
                 contentDiv.innerHTML += '<h4>Uploaded Media:</h4>';
@@ -159,17 +196,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         
-            // Add delete button
             contentDiv.innerHTML += `
                 <button id="edit-marker-btn">Edit Marker</button>
                 <button id="delete-marker-btn">Delete Marker</button>
             `;
         
-            detailsDiv.style.display = 'block';
-        
-            // Add click event listener to the delete button
             document.getElementById('edit-marker-btn').addEventListener('click', () => showEditMarkerForm(data));
             document.getElementById('delete-marker-btn').addEventListener('click', () => deleteMarker(data._id, markerObj));
+        
+            detailsDiv.style.display = 'block';
         }
         
 
@@ -267,11 +302,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('New marker added:', markerData);
         
                 addMarkerToMap(markerData);
-        
                 map.setView([markerData.lat, markerData.lng], 10);
-        
                 showMarkerDetails(markerData);
-        
+
+                // Refresh media sections
+                const allMarkers = await (await fetch('/api/markers')).json();
+                populateMediaSections(allMarkers);
+
                 e.target.reset();
         
             } catch (error) {
@@ -286,8 +323,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h3>Edit Marker</h3>
                 <form id="edit-marker-form">
                     <input type="hidden" name="id" value="${data._id}">
-                    <label for="edit-lat">Latitude:</label>
-                    <input type="number" id="edit-lat" name="lat" value="${data.lat}" step="any" required>
+                    <label for="edit-label">Label:</label>
+                    <input type="text" id="edit-label" name="label" value="${data.label}" step="any" required>
+                    <p><label for="edit-lat">Latitude:</label>
+                    <input type="number" id="edit-lat" name="lat" value="${data.lat}" step="any" required></p>
                     <p><label for="edit-lng">Longitude:</label>
                     <input type="number" id="edit-lng" name="lng" value="${data.lng}" step="any" required></p>
                     <p><label for="edit-start-time">Start Time:</label>

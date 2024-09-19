@@ -249,3 +249,23 @@ footer {
 #main-content, #questionnaire {
     display: none;
 }
+
+/* for adding media sections */
+.media-section {
+    margin-bottom: 40px;
+}
+
+.media-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.media-item {
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
